@@ -12,8 +12,7 @@
 //初始化CUDA
 
 extern int count = 0;
-extern float*h_Z;
-extern float*d_Z;
+
 bool InitCUDA(void)//CUDA初始化函数
 
 {
@@ -93,13 +92,37 @@ void Allocate_Memory(int n)
 	size_t size = n*sizeof(float);
 
 	h_Z = (float*)malloc(size);
-	cudaMalloc((void**)&d_Z, size));
+	cudaError_t error = cudaMalloc((void**)&d_Z, size);
+	printf("Allocate mem : %s\n", cudaGetErrorString(error));
 }
+
 void Free_Memory()
 {
 	if (h_Z)
 		free(h_Z);
-	cudaFree(d_Z);
+	cudaError_t error = cudaFree(d_Z);
+	printf("Free mem : %s\n", cudaGetErrorString(error));
+}
+
+void CopyMemToDevice(float *data,int n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		h_Z[i] = data[i];
+	}
+	size_t size = n*sizeof(float);
+	cudaError_t error = cudaMemcpy(d_Z, h_Z, size, cudaMemcpyHostToDevice);
+	printf("Memcpy Host to Device : %s\n", cudaGetErrorString(error));
+}
+
+void CopyMemToHost(float *data,int n)
+{
+	cudaError_t error = cudaMemcpy(h_Z, d_Z, n*sizeof(float), cudaMemcpyDeviceToHost);
+	printf("Memcpy Device to Host : %s\n", cudaGetErrorString(error));
+	for (int i = 0; i < n; i++)
+	{
+		data[i] = h_Z[i];
+	}
 }
 
 __global__ void Cal_Z(float*Z_data, float toolx, float tooly,float toolz, float toolr, float dx, float dy, int max_ix, int max_iy, int n)
