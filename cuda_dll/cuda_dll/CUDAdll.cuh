@@ -46,7 +46,9 @@ extern "C"
 
 	CUDADLLTEST_API void CopyMemToHost(float *data, int n);
 	
-	CUDADLLTEST_API __global__ void Cal_Z(float*Z_data, float toolx, float tooly, float toolz, float toolr, float dx, float dy, int max_ix, int max_iy, int n);
+	CUDADLLTEST_API void Call_cuda_CalZ(float toolx, float tooly, float toolz, float toolr, float dx, float dy, int max_ix, int max_iy, int n);
+
+	CUDADLLTEST_API __global__ void Cal_Z(float*Z_data, float toolx, float tooly, float toolz, float toolr, float dx, float dy, int max_ix, int max_iy, int init_index,int n);
 
 #ifdef __cplusplus
 

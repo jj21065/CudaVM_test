@@ -125,29 +125,41 @@ void CopyMemToHost(float *data,int n)
 	}
 }
 
-__global__ void Cal_Z(float*Z_data, float toolx, float tooly,float toolz, float toolr, float dx, float dy, int max_ix, int max_iy, int n)
+void Call_cuda_CalZ( float toolx, float tooly, float toolz, float toolr, float dx, float dy, int max_ix, int max_iy, int n)
 {
-	int I = blockDim.x*blockIdx.x + threadIdx.x;
+
+	int ix = toolx / dx - toolr / dx;
+	int iy = tooly / dy - toolr / dy;
+	if (ix < 0)
+		ix = 0;
+	if (iy < 0)
+		iy = 0;
+
+	int xcount = ix + 2 * toolr / dx;
+	int ycount = iy + 2 * toolr / dy;
+
+	if (xcount > max_ix)
+		xcount = max_ix;
+	if (ycount > max_iy)
+		ycount = max_iy;
+
+	int num = xcount*ycount;
+
+	int TPB = 256;
+	int BPG = (num + TPB - 1) / TPB;
+	int init_index = iy*max_iy + ix;
+	printf("cuda node num = %d\n", num);
+	
+	Cal_Z << <BPG, TPB >> >(d_Z, toolx, tooly, toolz, toolr, dx, dy, max_ix, max_iy, init_index, num);
+}
+
+__global__ void Cal_Z(float*Z_data, float toolx, float tooly,float toolz, float toolr, float dx, float dy, int max_ix, int max_iy,int init_index,int n)
+{
+	int I = blockDim.x*blockIdx.x + threadIdx.x + init_index;
 
 	int i, j;
 	if (I < n)
 	{
-
-
-		int ix = toolx / dx - toolr / dx;
-		int iy = tooly / dy - toolr / dy;
-		if (ix < 0)
-			ix = 0;
-		if (iy < 0)
-			iy = 0;
-
-		int xcount = ix + 2 * toolr / dx;
-		int ycount = iy + 2 * toolr / dy;
-
-		if (xcount > max_ix)
-			xcount = max_ix;
-		if (ycount > max_iy)
-			ycount = max_iy;
 		i = I % max_ix;
 		j = I / max_ix;
 		/*for (int i = ix; i < xcount; i++)
