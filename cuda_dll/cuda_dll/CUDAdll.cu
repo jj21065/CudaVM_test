@@ -162,11 +162,7 @@ __global__ void Cal_Z(float*Z_data, float toolx, float tooly,float toolz, float 
 	{
 		i = I % max_ix;
 		j = I / max_ix;
-		/*for (int i = ix; i < xcount; i++)
-		{
-			for (int j = iy; j < ycount; j++)
-			{*/
-
+	
 				if (pow((i*dx - toolx), 2) + pow((j*dy - tooly), 2) <= pow(toolr, 2)&& Z_data[i*max_iy + j] >= toolz)
 				{
 					float z_ball = -pow(pow(toolr, 2) - pow((i*dx - toolx), 2) - pow((j*dy - tooly), 2), float(0.5)) + toolr + toolz;
@@ -177,7 +173,6 @@ __global__ void Cal_Z(float*Z_data, float toolx, float tooly,float toolz, float 
 						Z_data[i*max_iy + j] = 0;
 					}
 				}
-			/*}
-		}*/
+
 	}
 }
